@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="قیمت‌یاب">
+<title>قیمت‌یاب ۱۶۸۸</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: #0f0f13;
+    color: #f0f0e8;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a24, #0f0f13);
+    padding: 50px 20px 20px;
+    border-bottom: 1px solid #2a2a38;
+    text-align: center;
+  }
+
+  .header h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .header p { font-size: 13px; color: #888; }
+  .dot { display: inline-block; width: 8px; height: 8px; background: #ff4d00; border-radius: 50%; margin-left: 8px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .container { padding: 20px 16px; max-width: 500px; margin: 0 auto; }
+
+  /* API Key section */
+  .api-section {
+    background: #1a1a24;
+    border: 1px solid #2a2a38;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .api-section label { font-size: 12px; color: #888; display: block; margin-bottom: 8px; }
+  .api-row { display: flex; gap: 8px; }
+  .api-input {
+    flex: 1;
+    background: #0f0f13;
+    border: 1px solid #3a3a50;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #f0f0e8;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px;
+    direction: ltr;
+  }
+  .api-input:focus { outline: none; border-color: #ff4d00; }
+  .save-btn {
+    background: #ff4d00;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .saved-badge { font-size: 11px; color: #4caf50; margin-top: 6px; display: none; }
+
+  /* Upload area */
+  .upload-area {
+    background: #1a1a24;
+    border: 2px dashed #2a2a38;
+    border-radius: 20px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .upload-area.has-image { border-style: solid; border-color: #ff4d00; padding: 12px; }
+  .upload-area:active { transform: scale(0.98); }
+  .upload-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+  .upload-text { font-size: 15px; color: #aaa; margin-bottom: 4px; }
+  .upload-sub { font-size: 12px; color: #555; }
+  #fileInput { display: none; }
+  #preview { width: 100%; border-radius: 12px; display: none; max-height: 280px; object-fit: contain; }
+  .change-text { font-size: 12px; color: #ff4d00; margin-top: 8px; display: none; }
+
+  /* Scan button */
+  .scan-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #ff4d00, #ff7700);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 18px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+    display: none;
+  }
+  .scan-btn:active { transform: scale(0.97); }
+  .scan-btn:disabled { background: #333; color: #666; }
+
+  /* Loading */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 32px;
+    background: #1a1a24;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid #2a2a38;
+    border-top-color: #ff4d00;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading p { font-size: 14px; color: #888; }
+
+  /* Result */
+  .result {
+    display: none;
+    background: #1a1a24;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid #2a2a38;
+  }
+  .result-header {
+    background: linear-gradient(135deg, #ff4d00, #ff7700);
+    padding: 16px 20px;
+  }
+  .result-header .label { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+  .result-header .product-name { font-size: 18px; font-weight: 700; color: white; line-height: 1.4; }
+  .result-header .product-en { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 2px; direction: ltr; text-align: left; }
+
+  .price-box {
+    padding: 20px;
+    border-bottom: 1px solid #2a2a38;
+    text-align: center;
+  }
+  .price-label { font-size: 11px; color: #888; margin-bottom: 8px; letter-spacing: 1px; }
+  .price-cny { font-size: 32px; font-weight: 700; color: #ff9500; direction: ltr; }
+  .price-conversions { display: flex; gap: 12px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+  .price-conv { background: #0f0f13; border-radius: 8px; padding: 6px 12px; font-size: 12px; color: #aaa; }
+
+  .details { padding: 16px 20px; }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #1f1f2c;
+    gap: 12px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { font-size: 12px; color: #666; flex-shrink: 0; }
+  .detail-value { font-size: 13px; color: #ddd; text-align: left; direction: ltr; }
+
+  .notes-box {
+    margin: 0 20px 20px;
+    background: #0f0f13;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.7;
+  }
+
+  .link-btn {
+    display: block;
+    margin: 0 20px 20px;
+    background: #0f0f13;
+    border: 1px solid #ff4d00;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    color: #ff4d00;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  /* Error */
+  .error {
+    display: none;
+    background: #1a0a0a;
+    border: 1px solid #5a1a1a;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .error p { font-size: 14px; color: #ff6666; }
+
+  /* Install tip */
+  .install-tip {
+    background: #1a1a24;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #888;
+    line-height: 1.8;
+    border: 1px solid #2a2a38;
+  }
+  .install-tip strong { color: #ff9500; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span class="dot"></span>قیمت‌یاب ۱۶۸۸</h1>
+  <p>عکس بگیر، قیمت بدان</p>
+</div>
+
+<div class="container">
+
+  <!-- Install tip -->
+  <div class="install-tip">
+    💡 <strong>نصب روی هوم‌اسکرین:</strong> دکمه Share رو بزنید ← <strong>Add to Home Screen</strong>
+  </div>
+
+  <!-- API Key -->
+  <div class="api-section">
+    <label>🔑 کلید Gemini API (یک بار وارد کنید)</label>
+    <div class="api-row">
+      <input class="api-input" id="apiKey" type="password" placeholder="AIza..." />
+      <button class="save-btn" onclick="saveKey()">ذخیره</button>
+    </div>
+    <div class="saved-badge" id="savedBadge">✓ کلید ذخیره شد</div>
+  </div>
+
+  <!-- Upload -->
+  <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-icon">📷</div>
+    <div class="upload-text">عکس محصول را انتخاب کنید</div>
+    <div class="upload-sub">از گالری یا دوربین</div>
+    <img id="preview" />
+    <div class="change-text" id="changeText">برای تغییر عکس کلیک کنید</div>
+  </div>
+  <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="handleFile(event)" />
+
+  <!-- Scan button -->
+  <button class="scan-btn" id="scanBtn" onclick="analyze()">
+    🔍 جستجوی قیمت در ۱۶۸۸
+  </button>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>در حال تحلیل محصول...</p>
+    <p style="font-size:12px;margin-top:6px;color:#555">چند ثانیه صبر کنید</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error" id="error">
+    <p id="errorMsg">خطایی رخ داد</p>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result">
+    <div class="result-header">
+      <div class="label">محصول شناسایی شده</div>
+      <div class="product-name" id="rName"></div>
+      <div class="product-en" id="rNameEn"></div>
+    </div>
+
+    <div class="price-box">
+      <div class="price-label">قیمت در ۱۶۸۸</div>
+      <div class="price-cny" id="rPrice"></div>
+      <div class="price-conversions">
+        <div class="price-conv" id="rUsd"></div>
+        <div class="price-conv" id="rToman"></div>
+      </div>
+    </div>
+
+    <div class="details">
+      <div class="detail-row" id="rowBrand" style="display:none">
+        <span class="detail-label">برند</span>
+        <span class="detail-value" id="rBrand"></span>
+      </div>
+      <div class="detail-row" id="rowCat" style="display:none">
+        <span class="detail-label">دسته‌بندی</span>
+        <span class="detail-value" id="rCat"></span>
+      </div>
+      <div class="detail-row" id="rowUnit" style="display:none">
+        <span class="detail-label">واحد</span>
+        <span class="detail-value" id="rUnit"></span>
+      </div>
+      <div class="detail-row" id="rowMoq" style="display:none">
+        <span class="detail-label">حداقل سفارش</span>
+        <span class="detail-value" id="rMoq"></span>
+      </div>
+    </div>
+
+    <div class="notes-box" id="rNotes" style="display:none"></div>
+    <a class="link-btn" id="rLink" href="#" target="_blank">مشاهده در ۱۶۸۸ ↗</a>
+  </div>
+
+</div>
+
+<script>
+  let imageBase64 = null;
+
+  // Load saved API key
+  window.onload = () => {
+    const saved = localStorage.getItem('gemini_key');
+    if (saved) {
+      document.getElementById('apiKey').value = saved;
+      document.getElementById('savedBadge').style.display = 'block';
+    }
+  };
+
+  function saveKey() {
+    const key = document.getElementById('apiKey').value.trim();
+    if (!key) return;
+    localStorage.setItem('gemini_key', key);
+    document.getElementById('savedBadge').style.display = 'block';
+  }
+
+  function handleFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const full = e.target.result;
+      imageBase64 = full.split(',')[1];
+      const preview = document.getElementById('preview');
+      preview.src = full;
+      preview.style.display = 'block';
+      document.getElementById('changeText').style.display = 'block';
+      document.querySelector('.upload-icon').style.display = 'none';
+      document.querySelector('.upload-text').style.display = 'none';
+      document.querySelector('.upload-sub').style.display = 'none';
+      document.getElementById('uploadArea').classList.add('has-image');
+      document.getElementById('scanBtn').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('error').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function analyze() {
+    const key = localStorage.getItem('gemini_key') || document.getElementById('apiKey').value.trim();
+    if (!key) { showError('لطفاً ابتدا کلید API را وارد و ذخیره کنید'); return; }
+    if (!imageBase64) { showError('لطفاً ابتدا یک عکس انتخاب کنید'); return; }
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('error').style.display = 'none';
+    document.getElementById('scanBtn').disabled = true;
+
+    const prompt = `این تصویر یک محصول است. محصول را شناسایی کن و قیمت تقریبی در 1688.com را تخمین بزن.
+فقط یک JSON خالص برگردان بدون هیچ متن اضافه:
+{"product_name":"نام فارسی","product_name_en":"English name","brand":"برند","category":"دسته‌بندی","price_min":عدد,"price_max":عدد,"unit":"per piece","moq":"10 pieces","source_url":"https://s.1688.com/selloffer/offerlist.htm?keywords=KEYWORD","notes":"نکات واردات"}`;
+
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [
+            { inline_data: { mime_type: 'image/jpeg', data: imageBase64 } },
+            { text: prompt }
+          ]}],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 800 }
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'خطا');
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('نتیجه‌ای دریافت نشد');
+
+      const r = JSON.parse(match[0]);
+      showResult(r);
+    } catch (e) {
+      showError(e.message || 'خطا در ارتباط با سرور');
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('scanBtn').disabled = false;
+  }
+
+  function showResult(r) {
+    document.getElementById('rName').textContent = r.product_name || '';
+    document.getElementById('rNameEn').textContent = r.product_name_en || '';
+
+    const min = r.price_min || 0;
+    const max = r.price_max || 0;
+    document.getElementById('rPrice').textContent = `¥${min.toLocaleString()} — ¥${max.toLocaleString()}`;
+
+    const usdMin = (min * 0.138).toFixed(1);
+    const usdMax = (max * 0.138).toFixed(1);
+    document.getElementById('rUsd').textContent = `$${usdMin}–$${usdMax}`;
+
+    const tMin = Math.round(min * 0.138 * 900000).toLocaleString('fa-IR');
+    const tMax = Math.round(max * 0.138 * 900000).toLocaleString('fa-IR');
+    document.getElementById('rToman').textContent = `${tMin}–${tMax} تومان`;
+
+    setDetail('rBrand', 'rowBrand', r.brand);
+    setDetail('rCat', 'rowCat', r.category);
+    setDetail('rUnit', 'rowUnit', r.unit);
+    setDetail('rMoq', 'rowMoq', r.moq);
+
+    if (r.notes) {
+      document.getElementById('rNotes').textContent = '📌 ' + r.notes;
+      document.getElementById('rNotes').style.display = 'block';
+    }
+
+    if (r.source_url) {
+      document.getElementById('rLink').href = r.source_url;
+    }
+
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function setDetail(id, rowId, val) {
+    if (val && val !== 'نامشخص') {
+      document.getElementById(id).textContent = val;
+      document.getElementById(rowId).style.display = 'flex';
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById('errorMsg').textContent = '⚠️ ' + msg;
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('scanBtn').disabled = false;
+  }
+</script>
+</body>
+</html>
